@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Custom hook for camera access
  * Handles WebRTC camera permissions and error states
@@ -44,9 +45,30 @@ export function useCamera() {
 
       setStream(mediaStream);
 
-      // Attach stream to video element
+      // Attach stream to video element and start playback
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+
+        // Wait for metadata to load before playing
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded, attempting to play...");
+          videoRef.current
+            ?.play()
+            .then(() => console.log("Video playback started successfully"))
+            .catch((playError) => {
+              console.warn("Autoplay failed:", playError);
+            });
+        };
+
+        // Also try to play immediately in case metadata is already loaded
+        if (videoRef.current.readyState >= 2) {
+          try {
+            await videoRef.current.play();
+            console.log("Video playing (metadata was already loaded)");
+          } catch (playError) {
+            console.warn("Immediate play failed:", playError);
+          }
+        }
       }
     } catch (err: any) {
       console.error("Camera access error:", err);
@@ -108,6 +130,20 @@ export function useCamera() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Ensure video plays when stream is attached
+   */
+  useEffect(() => {
+    if (stream && videoRef.current && videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+
+      // Play the video
+      videoRef.current.play().catch((err) => {
+        console.warn("Video play failed:", err);
+      });
+    }
+  }, [stream]);
 
   return {
     videoRef,

@@ -26,6 +26,11 @@ export interface FaceMeasurements {
   jawWidth: number;
   cheekboneWidth: number;
   foreheadWidth: number;
+  // Additional computed ratios
+  widthHeightRatio?: number;
+  jawCheekRatio?: number;
+  foreheadJawRatio?: number;
+  foreheadCheekRatio?: number;
 }
 
 // Face classification result
@@ -81,6 +86,14 @@ export interface AppError {
   message: string;
   recoverable: boolean;
   details?: string;
+  retryAfter?: number;
+}
+
+// API request types
+export interface AnalyzeFaceRequest {
+  image: string;
+  clientClassification?: FaceClassification;
+  landmarks?: FaceLandmark[];
 }
 
 // API response types
@@ -90,6 +103,8 @@ export interface AnalyzeFaceResponse {
   error?: {
     code: string;
     message: string;
+    recoverable?: boolean;
+    retryAfter?: number;
   };
 }
 

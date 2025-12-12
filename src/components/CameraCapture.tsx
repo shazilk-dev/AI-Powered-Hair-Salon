@@ -99,10 +99,7 @@ function FaceGuideOverlay() {
 /**
  * Main camera capture component
  */
-export function CameraCapture({
-  onCapture,
-  onError,
-}: CameraCaptureProps) {
+export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
   const { videoRef, stream, error, isLoading, startCamera, stopCamera } =
     useCamera();
   const [isCapturing, setIsCapturing] = useState(false);
@@ -224,6 +221,19 @@ export function CameraCapture({
                 muted
                 className="w-full h-full object-cover"
                 aria-label="Camera preview"
+                onLoadedMetadata={(e) => {
+                  const video = e.currentTarget;
+                  console.log("Video metadata loaded:", {
+                    videoWidth: video.videoWidth,
+                    videoHeight: video.videoHeight,
+                    readyState: video.readyState,
+                  });
+
+                  // Ensure video plays
+                  video.play().catch((err) => {
+                    console.error("Play failed:", err);
+                  });
+                }}
               />
 
               {/* Face positioning guide overlay */}
