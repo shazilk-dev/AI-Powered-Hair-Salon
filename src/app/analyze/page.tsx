@@ -33,6 +33,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Camera,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -340,12 +341,28 @@ export default function AnalyzePage() {
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
                   What's Next?
                 </p>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-4">
                   Based on your{" "}
                   <span className="font-semibold">{result.shape}</span> face
                   shape, we'll recommend hairstyles that complement your
                   features perfectly.
                 </p>
+                <Button
+                  onClick={() => {
+                    const params = new URLSearchParams({
+                      shape: result.shape,
+                      confidence: result.confidence.toString(),
+                      reasoning: result.reasoning,
+                      image: encodeURIComponent(capturedImage || ""),
+                    });
+                    window.location.href = `/results?${params.toString()}`;
+                  }}
+                  className="w-full"
+                  size="lg"
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  View Personalized Recommendations
+                </Button>
               </div>
             </CardContent>
           </Card>
