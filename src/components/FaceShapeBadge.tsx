@@ -12,11 +12,19 @@ interface FaceShapeBadgeProps {
 
 export function FaceShapeBadge({ shape, confidence }: FaceShapeBadgeProps) {
   return (
-    <div className="inline-flex items-center gap-2">
-      <Badge variant="default" className="px-4 py-2 text-base">
+    <div
+      className="inline-flex items-center gap-2"
+      role="status"
+      aria-label={`Face shape: ${shape}, ${confidence} percent confidence`}
+    >
+      <Badge
+        variant="default"
+        className="px-4 py-2 text-base"
+        aria-hidden="true"
+      >
         <span className="capitalize">{shape}</span>
       </Badge>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-sm text-muted-foreground" aria-hidden="true">
         {confidence}% confidence
       </span>
     </div>

@@ -13,7 +13,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { CameraCapture } from "@/components/CameraCapture";
+import dynamic from "next/dynamic";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { FaceShapeBadge } from "@/components/FaceShapeBadge";
@@ -35,6 +35,29 @@ import {
   Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/**
+ * Lazy load CameraCapture component for performance
+ * - Reduces initial bundle size significantly
+ * - Only loads when user actually starts analysis
+ * - SSR disabled since camera only works client-side
+ */
+const CameraCapture = dynamic(
+  () =>
+    import("@/components/CameraCapture").then((mod) => ({
+      default: mod.CameraCapture,
+    })),
+  {
+    loading: () => (
+      <Card>
+        <CardContent className="p-12">
+          <LoadingOverlay message="Loading camera interface..." />
+        </CardContent>
+      </Card>
+    ),
+    ssr: false,
+  }
+);
 
 type AnalysisState = "idle" | "capturing" | "analyzing" | "complete" | "error";
 

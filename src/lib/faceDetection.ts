@@ -8,15 +8,28 @@
  * - Face boundary detection
  * - Initialization and cleanup
  *
+ * Performance Optimization:
+ * - MediaPipe is lazy-loaded to reduce initial bundle size (~500KB savings)
+ * - Only loaded when face detection is actually needed
+ *
  * @see https://developers.google.com/mediapipe/solutions/vision/face_landmarker
  */
 
-import {
-  FaceLandmarker,
-  FilesetResolver,
-  FaceLandmarkerResult,
-} from "@mediapipe/tasks-vision";
 import type { FaceLandmark } from "@/types";
+
+/**
+ * Lazy-loaded MediaPipe types
+ * These are loaded dynamically when initializeFaceLandmarker() is called
+ */
+type FaceLandmarkerType = any;
+type FilesetResolverType = any;
+type FaceLandmarkerResultType = any;
+
+/**
+ * MediaPipe module cache
+ * Stores the dynamically imported module to avoid re-importing
+ */
+let mediaPipeModule: any = null;
 
 /**
  * Critical MediaPipe Face Mesh landmark indices
@@ -98,13 +111,15 @@ const MEDIAPIPE_CONFIG = {
 /**
  * Singleton instance of FaceLandmarker
  */
-let faceLandmarkerInstance: FaceLandmarker | null = null;
+let faceLandmarkerInstance: FaceLandmarkerType | null = null;
 
 /**
  * Initialize MediaPipe FaceLandmarker
  *
- * Downloads WASM files and creates FaceLandmarker instance.
- * Safe to call multiple times - returns existing instance if already initialized.
+ * Performance Optimization:
+ * - Lazy loads MediaPipe library (~500KB) only when needed
+ * - Downloads WASM files and creates FaceLandmarker instance
+ * - Safe to call multiple times - returns existing instance if already initialized
  *
  * @throws {Error} If MediaPipe fails to initialize
  * @returns Promise<FaceLandmarker> Initialized face landmarker
@@ -114,13 +129,22 @@ let faceLandmarkerInstance: FaceLandmarker | null = null;
  * const landmarker = await initializeFaceLandmarker();
  * ```
  */
-export async function initializeFaceLandmarker(): Promise<FaceLandmarker> {
+export async function initializeFaceLandmarker(): Promise<FaceLandmarkerType> {
   // Return existing instance if already initialized
   if (faceLandmarkerInstance) {
     return faceLandmarkerInstance;
   }
 
   try {
+    // Lazy load MediaPipe module (only on first call)
+    if (!mediaPipeModule) {
+      console.log("📦 Lazy loading MediaPipe library...");
+      mediaPipeModule = await import("@mediapipe/tasks-vision");
+      console.log("✅ MediaPipe library loaded");
+    }
+
+    const { FaceLandmarker, FilesetResolver } = mediaPipeModule;
+
     // Load MediaPipe Vision WASM files
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
@@ -175,21 +199,26 @@ export function detectFace(
 
   try {
     // Detect face landmarks in video frame
-    const results: FaceLandmarkerResult = faceLandmarkerInstance.detectForVideo(
-      video,
-      timestamp
-    );
+    const results: FaceLandmarkerResultType =
+      faceLandmarkerInstance.detectForVideo(video, timestamp);
 
     // Check if face detected
     if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
       return null;
     }
 
+    // Check for multiple faces (error code from SPEC.md section 6.1)
+    if (results.faceLandmarks.length > 1) {
+      throw new Error(
+        "MULTIPLE_FACES: Please ensure only one person is in the frame."
+      );
+    }
+
     // Get first face (we only detect one)
     const faceLandmarks = results.faceLandmarks[0];
 
     // Convert MediaPipe landmarks to our format
-    const landmarks: FaceLandmark[] = faceLandmarks.map((landmark) => ({
+    const landmarks: FaceLandmark[] = faceLandmarks.map((landmark: any) => ({
       x: landmark.x,
       y: landmark.y,
       z: landmark.z || 0,

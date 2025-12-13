@@ -67,11 +67,10 @@ export interface AppState {
   error: AppError | null;
 }
 
-// Error types
+// Error types matching SPEC.md section 6.1
 export type ErrorCode =
   | "CAMERA_PERMISSION_DENIED"
   | "CAMERA_NOT_FOUND"
-  | "CAMERA_ERROR"
   | "NO_FACE_DETECTED"
   | "MULTIPLE_FACES"
   | "POOR_LIGHTING"

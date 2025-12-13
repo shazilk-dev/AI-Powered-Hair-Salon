@@ -184,7 +184,17 @@ export function useFaceDetection(
         }
       } catch (err) {
         console.error("Detection error:", err);
-        handleError(err, "UNKNOWN_ERROR");
+
+        // Check for specific error types from faceDetection.ts
+        const errorMessage = err instanceof Error ? err.message : String(err);
+
+        // Handle MULTIPLE_FACES error from SPEC.md section 6.1
+        if (errorMessage.includes("MULTIPLE_FACES")) {
+          handleError(err, "MULTIPLE_FACES");
+        } else {
+          handleError(err, "UNKNOWN_ERROR");
+        }
+
         setLandmarks(null);
         setBoundingBox(null);
         setConfidence(null);

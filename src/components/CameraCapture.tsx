@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, CameraOff, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { AppError } from "@/types";
 
 interface CameraCaptureProps {
   onCapture: (imageData: string) => void;
@@ -110,9 +111,15 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
    */
   const validateImageQuality = (
     canvas: HTMLCanvasElement
-  ): { valid: boolean; reason?: string } => {
+  ): { valid: boolean; reason?: string; errorCode?: AppError["code"] } => {
     const ctx = canvas.getContext("2d");
-    if (!ctx) return { valid: false, reason: "Canvas context unavailable" };
+    if (!ctx) {
+      return {
+        valid: false,
+        reason: "Canvas context unavailable",
+        errorCode: "UNKNOWN_ERROR",
+      };
+    }
 
     // Get image data for analysis
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -133,12 +140,14 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
       return {
         valid: false,
         reason: "Image too dark. Please improve lighting.",
+        errorCode: "POOR_LIGHTING",
       };
     }
     if (avgBrightness > 230) {
       return {
         valid: false,
         reason: "Image too bright. Please adjust lighting.",
+        errorCode: "POOR_LIGHTING",
       };
     }
 
@@ -147,6 +156,7 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
 
   /**
    * Handle photo capture with quality validation
+   * Enforces SPEC.md 7.2 limits: max 5MB, max 1920x1920 resolution
    */
   const handleCapture = () => {
     if (!videoRef.current) return;
@@ -155,17 +165,28 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
 
     try {
       // Create canvas to capture frame
+      let width = videoRef.current.videoWidth;
+      let height = videoRef.current.videoHeight;
+
+      // Enforce maximum resolution (SPEC.md 7.2: 1920x1920 max)
+      const MAX_DIMENSION = 1920;
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        const scale = MAX_DIMENSION / Math.max(width, height);
+        width = Math.floor(width * scale);
+        height = Math.floor(height * scale);
+      }
+
       const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      canvas.width = width;
+      canvas.height = height;
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
         throw new Error("Failed to get canvas context");
       }
 
-      // Draw video frame to canvas
-      ctx.drawImage(videoRef.current, 0, 0);
+      // Draw video frame to canvas (scaled if needed)
+      ctx.drawImage(videoRef.current, 0, 0, width, height);
 
       // Validate image quality
       const validation = validateImageQuality(canvas);
@@ -175,6 +196,19 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
 
       // Convert to base64
       const imageData = canvas.toDataURL("image/jpeg", 0.95);
+
+      // Validate file size (SPEC.md 7.2: max 5MB)
+      const imageSizeBytes = (imageData.length * 3) / 4; // Base64 to bytes
+      const MAX_SIZE_MB = 5;
+      const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+      if (imageSizeBytes > MAX_SIZE_BYTES) {
+        throw new Error(
+          `Image too large (${(imageSizeBytes / (1024 * 1024)).toFixed(
+            1
+          )}MB). Maximum size is ${MAX_SIZE_MB}MB. Try moving further from camera.`
+        );
+      }
 
       // Stop camera and pass to parent
       stopCamera();
@@ -197,7 +231,13 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
       {error && (
         <ErrorMessage
           error={{
-            code: "CAMERA_ERROR",
+            code: error.toLowerCase().includes("permission") ||
+                  error.toLowerCase().includes("denied")
+              ? "CAMERA_PERMISSION_DENIED"
+              : error.toLowerCase().includes("not found") ||
+                error.toLowerCase().includes("no camera")
+              ? "CAMERA_NOT_FOUND"
+              : "UNKNOWN_ERROR",
             message: error,
             recoverable: true,
           }}
