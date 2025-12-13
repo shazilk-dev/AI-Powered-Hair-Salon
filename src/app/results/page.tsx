@@ -88,7 +88,9 @@ function ResultsContent() {
     const shape = searchParams.get("shape");
     const confidence = searchParams.get("confidence");
     const reasoning = searchParams.get("reasoning");
-    const image = searchParams.get("image");
+
+    // Get image from sessionStorage instead of URL (prevents 431 error)
+    const image = sessionStorage.getItem("styleai_captured_image");
 
     // Validate required parameters
     if (!shape || !confidence || !image) {
@@ -117,7 +119,7 @@ function ResultsContent() {
 
     setState((prev) => ({
       ...prev,
-      capturedImage: decodeURIComponent(image),
+      capturedImage: image, // Already decoded from sessionStorage
       classification,
     }));
 
@@ -203,7 +205,7 @@ function ResultsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-12">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20 pb-12">
       <div className="container mx-auto max-w-7xl p-4 md:p-6">
         {/* Header */}
         <div className="mb-8">
@@ -366,7 +368,7 @@ function ResultsContent() {
                       {state.selectedHairstyle ? (
                         <div className="space-y-4">
                           {/* Coming Soon Notice */}
-                          <div className="aspect-square flex flex-col items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-200 p-6 text-center">
+                          <div className="aspect-square flex flex-col items-center justify-center rounded-lg bg-linear-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-200 p-6 text-center">
                             <div className="w-16 h-16 mb-4 rounded-full bg-blue-100 flex items-center justify-center">
                               <Sparkles className="w-8 h-8 text-blue-600" />
                             </div>
@@ -407,7 +409,7 @@ function ResultsContent() {
                     </TabsContent>
 
                     <TabsContent value="compare" className="mt-4">
-                      <div className="aspect-square flex flex-col items-center justify-center rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-dashed border-purple-200 p-6 text-center">
+                      <div className="aspect-square flex flex-col items-center justify-center rounded-lg bg-linear-to-br from-purple-50 to-pink-50 border-2 border-dashed border-purple-200 p-6 text-center">
                         <div className="w-16 h-16 mb-4 rounded-full bg-purple-100 flex items-center justify-center">
                           <svg
                             className="w-8 h-8 text-purple-600"

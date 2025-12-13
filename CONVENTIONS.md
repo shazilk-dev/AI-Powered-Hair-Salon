@@ -25,29 +25,29 @@ Always organize imports in this order, with blank lines between groups:
 
 ```typescript
 // 1. React and Next.js
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // 2. Third-party libraries
-import { Camera, Download, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Download, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // 3. Internal components (absolute imports)
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { HairstyleGallery } from '@/components/HairstyleGallery';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { HairstyleGallery } from "@/components/HairstyleGallery";
 
 // 4. Internal utilities and hooks
-import { classifyFaceShape } from '@/lib/faceShapeClassifier';
-import { useFaceDetection } from '@/hooks/useFaceDetection';
-import { cn } from '@/lib/utils';
+import { classifyFaceShape } from "@/lib/faceShapeClassifier";
+import { useFaceDetection } from "@/hooks/useFaceDetection";
+import { cn } from "@/lib/utils";
 
 // 5. Types (use 'import type' when possible)
-import type { FaceShape, Hairstyle, AppError } from '@/types';
+import type { FaceShape, Hairstyle, AppError } from "@/types";
 
 // 6. Styles (if any CSS modules)
-import styles from './Component.module.css';
+import styles from "./Component.module.css";
 ```
 
 ### 1.3 Export Style
@@ -85,18 +85,18 @@ interface HairstyleProps {
 }
 
 // ✅ Use type for unions and intersections
-type FaceShape = 'oval' | 'round' | 'square' | 'heart' | 'oblong' | 'diamond';
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type FaceShape = "oval" | "round" | "square" | "heart" | "oblong" | "diamond";
+type ButtonVariant = "primary" | "secondary" | "ghost";
 
 // ✅ Use type for function signatures
 type OnSelectHandler = (id: string) => void;
 type ClassifyFunction = (landmarks: FaceLandmark[]) => FaceClassification;
 
 // ✅ Use 'import type' for type-only imports
-import type { FaceShape, Hairstyle } from '@/types';
+import type { FaceShape, Hairstyle } from "@/types";
 
 // ❌ Never use 'any'
-const data: any = response;  // Bad
+const data: any = response; // Bad
 
 // ✅ Use 'unknown' if type is truly unknown, then narrow
 const data: unknown = response;
@@ -110,12 +110,12 @@ if (isValidResponse(data)) {
 ```typescript
 // ✅ Handle nullable values explicitly
 interface Props {
-  hairstyle: Hairstyle | null;  // Explicitly nullable
-  error?: string;               // Optional (undefined)
+  hairstyle: Hairstyle | null; // Explicitly nullable
+  error?: string; // Optional (undefined)
 }
 
 // ✅ Use optional chaining
-const name = hairstyle?.name ?? 'Unknown';
+const name = hairstyle?.name ?? "Unknown";
 
 // ✅ Use nullish coalescing
 const score = classification?.confidence ?? 0;
@@ -234,11 +234,11 @@ export function ComponentName({
 export function useFaceDetection(videoRef: RefObject<HTMLVideoElement>) {
   const [landmarks, setLandmarks] = useState<FaceLandmark[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     // Detection logic
   }, [videoRef]);
-  
+
   return { landmarks, error };
 }
 
@@ -250,7 +250,7 @@ const sortedHairstyles = useMemo(() => {
 // ✅ Memoize callbacks passed to children
 const handleSelect = useCallback((id: string) => {
   setSelectedId(id);
-}, []);  // Empty deps if no dependencies
+}, []); // Empty deps if no dependencies
 
 // ✅ Use refs for DOM elements and mutable values
 const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -271,7 +271,7 @@ const handleKeyDown = (e: KeyboardEvent) => { ... };
 
 // ✅ For items in lists, use data attributes or closure
 {items.map(item => (
-  <Button 
+  <Button
     key={item.id}
     onClick={() => handleItemClick(item.id)}  // Acceptable
   />
@@ -311,7 +311,7 @@ import { cn } from '@/lib/utils';
 " />
 
 // ❌ Avoid arbitrary values
-<div className="w-[347px] p-[13px]" />  // Bad
+<div className="w-86.75 p-3.25" />  // Bad
 
 // ✅ Use design system values
 <div className="w-80 p-4" />  // Good
@@ -350,9 +350,9 @@ const buttonVariants = {
 // ✅ Wrap async operations
 async function analyzeFace(image: string): Promise<Result> {
   try {
-    const response = await fetch('/api/analyze-face', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/analyze-face", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image }),
     });
 
@@ -364,8 +364,8 @@ async function analyzeFace(image: string): Promise<Result> {
     return { success: true, data };
   } catch (error) {
     // Log for debugging
-    console.error('Face analysis failed:', error);
-    
+    console.error("Face analysis failed:", error);
+
     // Return structured error
     return {
       success: false,
@@ -382,7 +382,7 @@ async function analyzeFace(image: string): Promise<Result> {
 function normalizeError(error: unknown): AppError {
   if (error instanceof ApiError) {
     return {
-      code: error.statusCode === 429 ? 'API_RATE_LIMITED' : 'API_ERROR',
+      code: error.statusCode === 429 ? "API_RATE_LIMITED" : "API_ERROR",
       message: error.message,
       recoverable: error.statusCode === 429,
     };
@@ -390,15 +390,15 @@ function normalizeError(error: unknown): AppError {
 
   if (error instanceof TypeError) {
     return {
-      code: 'NETWORK_ERROR',
-      message: 'Unable to connect to the server',
+      code: "NETWORK_ERROR",
+      message: "Unable to connect to the server",
       recoverable: true,
     };
   }
 
   return {
-    code: 'UNKNOWN_ERROR',
-    message: 'An unexpected error occurred',
+    code: "UNKNOWN_ERROR",
+    message: "An unexpected error occurred",
     recoverable: false,
   };
 }
@@ -408,9 +408,9 @@ function normalizeError(error: unknown): AppError {
 
 ```typescript
 // ✅ Use error boundaries for component trees
-'use client';
+"use client";
 
-import { Component, ReactNode } from 'react';
+import { Component, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -429,7 +429,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('Error boundary caught:', error, info);
+    console.error("Error boundary caught:", error, info);
   }
 
   render() {
@@ -483,9 +483,9 @@ export class ErrorBoundary extends Component<Props, State> {
 ```typescript
 // ✅ Visible focus indicators
 <button className="
-  focus:outline-none 
-  focus:ring-2 
-  focus:ring-blue-500 
+  focus:outline-none
+  focus:ring-2
+  focus:ring-blue-500
   focus:ring-offset-2
 ">
 
@@ -546,9 +546,7 @@ const handleKeyDown = (e: KeyboardEvent, index: number) => {
 ```typescript
 // ✅ Memoize expensive computations
 const sortedItems = useMemo(() => {
-  return items
-    .filter(item => item.active)
-    .sort((a, b) => b.score - a.score);
+  return items.filter((item) => item.active).sort((a, b) => b.score - a.score);
 }, [items]);
 
 // ✅ Memoize callback functions
@@ -566,7 +564,7 @@ const MemoizedGallery = memo(HairstyleGallery);
 // ✅ Dynamic imports for heavy components
 const MediaPipeDetector = dynamic(
   () => import('@/components/FaceDetector'),
-  { 
+  {
     ssr: false,  // Don't render on server
     loading: () => <LoadingSpinner />,
   }
@@ -676,24 +674,24 @@ docs/api-documentation
 
 ### 10.1 JSDoc Comments
 
-```typescript
+````typescript
 /**
  * Classifies face shape based on facial landmark measurements.
- * 
+ *
  * @description Uses width-to-height and jaw-to-cheekbone ratios
  * to determine the closest matching face shape category.
- * 
+ *
  * @param landmarks - Array of 468 MediaPipe face landmarks
  * @param options - Optional classification parameters
  * @returns Classification result with shape and confidence
- * 
+ *
  * @example
  * ```typescript
  * const result = classifyFaceShape(landmarks);
  * console.log(result.shape); // 'oval'
  * console.log(result.confidence); // 85
  * ```
- * 
+ *
  * @throws {Error} If landmarks array is empty or invalid
  */
 export function classifyFaceShape(
@@ -702,17 +700,17 @@ export function classifyFaceShape(
 ): FaceClassification {
   // Implementation
 }
-```
+````
 
 ### 10.2 Component Documentation
 
-```typescript
+````typescript
 /**
  * Interactive hairstyle gallery component.
- * 
+ *
  * Displays a grid of hairstyle recommendations with selection state,
  * keyboard navigation, and accessibility support.
- * 
+ *
  * @component
  * @example
  * ```tsx
@@ -726,8 +724,8 @@ export function classifyFaceShape(
 export function HairstyleGallery({ ... }: HairstyleGalleryProps) {
   // Implementation
 }
-```
+````
 
 ---
 
-*End of Coding Conventions*
+_End of Coding Conventions_

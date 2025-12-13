@@ -18,7 +18,7 @@ import { LoadingOverlay } from "./LoadingOverlay";
 import { ErrorMessage } from "./ErrorMessage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Camera, CameraOff, Info } from "lucide-react";
+import { Camera, CameraOff, Lightbulb, User, Sun, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AppError } from "@/types";
 
@@ -90,8 +90,8 @@ function FaceGuideOverlay() {
       </svg>
 
       {/* Instruction text */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm font-medium">
-        Position your face in the oval
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-xs font-medium border border-white/10">
+        Align face within guide
       </div>
     </div>
   );
@@ -231,13 +231,14 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
       {error && (
         <ErrorMessage
           error={{
-            code: error.toLowerCase().includes("permission") ||
-                  error.toLowerCase().includes("denied")
-              ? "CAMERA_PERMISSION_DENIED"
-              : error.toLowerCase().includes("not found") ||
-                error.toLowerCase().includes("no camera")
-              ? "CAMERA_NOT_FOUND"
-              : "UNKNOWN_ERROR",
+            code:
+              error.toLowerCase().includes("permission") ||
+              error.toLowerCase().includes("denied")
+                ? "CAMERA_PERMISSION_DENIED"
+                : error.toLowerCase().includes("not found") ||
+                    error.toLowerCase().includes("no camera")
+                  ? "CAMERA_NOT_FOUND"
+                  : "UNKNOWN_ERROR",
             message: error,
             recoverable: true,
           }}
@@ -250,7 +251,7 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
 
       {/* Active camera view */}
       {stream && (
-        <Card>
+        <Card className="overflow-hidden border-purple-200 dark:border-purple-800/30 shadow-lg">
           <CardContent className="p-0">
             {/* Video preview with face guide */}
             <div className="relative overflow-hidden rounded-t-lg bg-black aspect-4/3">
@@ -280,36 +281,43 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
               <FaceGuideOverlay />
             </div>
 
-            {/* Instructions banner */}
-            <div className="bg-blue-50 border-b border-blue-100 p-3 flex items-start gap-2">
-              <Info
-                className="h-5 w-5 text-blue-600 shrink-0 mt-0.5"
-                aria-hidden="true"
-              />
-              <div className="text-sm text-blue-900">
-                <p className="font-medium">Tips for best results:</p>
-                <ul className="mt-1 space-y-0.5 text-blue-800">
-                  <li>• Face the camera directly</li>
-                  <li>• Ensure good lighting</li>
-                  <li>• Remove glasses if possible</li>
-                  <li>• Keep hair away from face</li>
-                </ul>
+            {/* Compact Tips Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/10 border-t border-purple-200/50 dark:border-purple-800/30 px-4 py-3">
+              <div className="flex items-center gap-3 text-xs">
+                <div className="flex items-center gap-1.5 text-purple-700 dark:text-purple-300 font-medium">
+                  <Lightbulb className="h-3.5 w-3.5" />
+                  <span>Tips:</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-purple-600 dark:text-purple-400">
+                  <span className="flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    Face forward
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Sun className="h-3 w-3" />
+                    Good lighting
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    Remove glasses
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-2 p-4">
+            <div className="flex gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
               <Button
                 onClick={handleCapture}
                 disabled={isCapturing}
                 className={cn(
-                  "flex-1",
-                  isCapturing && "opacity-50 cursor-not-allowed"
+                  "flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold shadow-md hover:shadow-lg transition-all",
+                  isCapturing && "opacity-60 cursor-not-allowed"
                 )}
                 size="lg"
                 aria-label="Capture photo"
               >
-                <Camera className="mr-2 h-5 w-5" aria-hidden="true" />
+                <Camera className="mr-2 h-4 w-4" aria-hidden="true" />
                 {isCapturing ? "Capturing..." : "Capture Photo"}
               </Button>
               <Button
@@ -317,10 +325,10 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
                 disabled={isCapturing}
                 variant="outline"
                 size="lg"
+                className="border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Cancel and close camera"
               >
-                <CameraOff className="mr-2 h-5 w-5" aria-hidden="true" />
-                Cancel
+                <CameraOff className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </CardContent>
@@ -329,27 +337,30 @@ export function CameraCapture({ onCapture, onError }: CameraCaptureProps) {
 
       {/* Initial state - camera not started */}
       {!stream && !isLoading && !error && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <div className="p-4 bg-gray-100 rounded-full">
-              <Camera className="h-16 w-16 text-gray-400" aria-hidden="true" />
+        <Card className="border-purple-200 dark:border-purple-800/30 shadow-lg">
+          <CardContent className="flex flex-col items-center gap-6 p-12 text-center">
+            <div className="p-6 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl">
+              <Camera
+                className="h-16 w-16 text-purple-600 dark:text-purple-400"
+                aria-hidden="true"
+              />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="space-y-3">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Camera Access Required
               </h3>
-              <p className="mt-2 text-sm text-gray-600 max-w-sm">
-                We need access to your camera to capture your photo. Your image
-                is processed locally and never stored.
+              <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
+                We need camera access to capture your photo for analysis. Your
+                image is processed securely and never stored on our servers.
               </p>
             </div>
             <Button
               onClick={startCamera}
               size="lg"
-              className="mt-2"
+              className="mt-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold shadow-md hover:shadow-lg transition-all px-8"
               aria-label="Start camera"
             >
-              <Camera className="mr-2 h-5 w-5" aria-hidden="true" />
+              <Camera className="mr-2 h-4 w-4" aria-hidden="true" />
               Start Camera
             </Button>
           </CardContent>
