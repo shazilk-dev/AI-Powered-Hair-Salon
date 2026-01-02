@@ -20,6 +20,7 @@
 "use client";
 
 import React, { useRef, useCallback, KeyboardEvent } from "react";
+import Image from "next/image";
 import type { Hairstyle } from "@/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -182,17 +183,14 @@ export const HairstyleGallery = React.memo(function HairstyleGallery({
                     </div>
                   )}
 
-                  {/* Placeholder for hairstyle image (Day 4) */}
-                  <div className="flex h-full items-center justify-center p-4 text-center">
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-muted-foreground">
-                        {hairstyle.name}
-                      </div>
-                      <div className="text-xs text-muted-foreground/70">
-                        Image preview
-                      </div>
-                    </div>
-                  </div>
+                  {/* Hairstyle image */}
+                  <Image
+                    src={hairstyle.imagePath}
+                    alt={hairstyle.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                  />
                 </div>
               </CardContent>
 
